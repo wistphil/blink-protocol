@@ -1,0 +1,15 @@
+# build directories
+*build*/
+
+# CMake
+CMakeUserPresets.json
+
+# IDEs
+.idea/
+.vs/
+.vscode/
+.cache
+
+# macOS files
+.DS_Store
+
