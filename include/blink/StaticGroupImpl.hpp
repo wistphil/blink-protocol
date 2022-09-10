@@ -1,5 +1,7 @@
 #pragma once
 
+#include "blink/Util.hpp"
+
 #include <optional>
 #include <string_view>
 #include <span>
@@ -8,9 +10,6 @@ namespace blink {
 
 class StaticGroupImpl
 {
-    template <typename T>
-    struct Tag { using type = T; };
-
 public:
     StaticGroupImpl(std::span<std::uint8_t> data);
 
@@ -33,28 +32,28 @@ public:
 
     template <typename T>
     auto get_field(std::size_t offset) const -> T
-    { return get_field(offset, Tag<T>{}); }
+    { return do_get_field(offset, Tag<T>{}); }
 
 private:
-    void set_field(std::size_t offset, const void * ptr, std::size_t size, std::size_t max_length);
+    void do_set_field(std::size_t offset, const void * ptr, std::size_t size, std::size_t max_length);
 
 private:
-    auto get_field(std::size_t offset, Tag<bool> tag) const -> decltype(tag)::type;
-    auto get_field(std::size_t offset, Tag<std::int8_t> tag) const -> decltype(tag)::type;
-    auto get_field(std::size_t offset, Tag<std::uint8_t> tag) const -> decltype(tag)::type;
-    auto get_field(std::size_t offset, Tag<std::int16_t> tag) const -> decltype(tag)::type;
-    auto get_field(std::size_t offset, Tag<std::uint16_t> tag) const -> decltype(tag)::type;
-    auto get_field(std::size_t offset, Tag<std::int32_t> tag) const -> decltype(tag)::type;
-    auto get_field(std::size_t offset, Tag<std::uint32_t> tag) const -> decltype(tag)::type;
-    auto get_field(std::size_t offset, Tag<std::int64_t> tag) const -> decltype(tag)::type;
-    auto get_field(std::size_t offset, Tag<std::uint64_t> tag) const -> decltype(tag)::type;
-    auto get_field(std::size_t offset, Tag<double> tag) const -> decltype(tag)::type;
+    auto do_get_field(std::size_t offset, Tag<bool> tag) const -> decltype(tag)::type;
+    auto do_get_field(std::size_t offset, Tag<std::int8_t> tag) const -> decltype(tag)::type;
+    auto do_get_field(std::size_t offset, Tag<std::uint8_t> tag) const -> decltype(tag)::type;
+    auto do_get_field(std::size_t offset, Tag<std::int16_t> tag) const -> decltype(tag)::type;
+    auto do_get_field(std::size_t offset, Tag<std::uint16_t> tag) const -> decltype(tag)::type;
+    auto do_get_field(std::size_t offset, Tag<std::int32_t> tag) const -> decltype(tag)::type;
+    auto do_get_field(std::size_t offset, Tag<std::uint32_t> tag) const -> decltype(tag)::type;
+    auto do_get_field(std::size_t offset, Tag<std::int64_t> tag) const -> decltype(tag)::type;
+    auto do_get_field(std::size_t offset, Tag<std::uint64_t> tag) const -> decltype(tag)::type;
+    auto do_get_field(std::size_t offset, Tag<double> tag) const -> decltype(tag)::type;
 
-    auto get_field(std::size_t offset, Tag<std::string_view> tag) const -> decltype(tag)::type;
-    auto get_field(std::size_t offset, Tag<std::span<std::uint8_t>> tag) const -> decltype(tag)::type;
+    auto do_get_field(std::size_t offset, Tag<std::string_view> tag) const -> decltype(tag)::type;
+    auto do_get_field(std::size_t offset, Tag<std::span<std::uint8_t>> tag) const -> decltype(tag)::type;
 
     template <typename T>
-    auto get_field(std::size_t offset, Tag<std::optional<T>> tag) const -> typename decltype(tag)::type;
+    auto do_get_field(std::size_t offset, Tag<std::optional<T>> tag) const -> typename decltype(tag)::type;
 
 private:
     std::span<std::uint8_t> data_;
@@ -73,10 +72,10 @@ void StaticGroupImpl::set_field(std::size_t offset, std::optional<T> value)
 }
 
 template <typename T>
-auto StaticGroupImpl::get_field(std::size_t offset, Tag<std::optional<T>> tag) const -> typename decltype(tag)::type
+auto StaticGroupImpl::do_get_field(std::size_t offset, Tag<std::optional<T>> tag) const -> typename decltype(tag)::type
 {
-    if (get_field(offset, Tag<bool>{})) {
-        return get_field(offset + 1, Tag<T>{});
+    if (do_get_field(offset, Tag<bool>{})) {
+        return do_get_field(offset + 1, Tag<T>{});
     }
     return {};
 }

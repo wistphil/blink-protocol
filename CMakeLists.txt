@@ -17,9 +17,12 @@ target_include_directories(blink
 target_sources(blink
     PRIVATE
         include/blink/DynamicGroupImpl.hpp
+        src/DynamicGroupImpl.cpp
         include/blink/DynamicGroupPreamble.hpp
+        src/DynamicGroupPreamble.cpp
         include/blink/StaticGroupImpl.hpp
-        src/StaticGroupImpl.cpp)
+        src/StaticGroupImpl.cpp
+        include/blink/Util.hpp)
 
 target_link_libraries(blink PRIVATE byte_order::byte_order)
 

@@ -16,61 +16,61 @@ auto set_field_get_field(T value, std::size_t buffer_size = sizeof(T)) -> T
     return group.get_field<T>(0);
 }
 
-TEST(GroupImplTests, set_get_bool)
+TEST(StaticGroupImplTests, set_get_bool)
 {
     EXPECT_EQ(true, set_field_get_field(true));
     EXPECT_EQ(false, set_field_get_field(false));
 }
 
-TEST(GroupImplTests, set_get_int8_t)
+TEST(StaticGroupImplTests, set_get_int8_t)
 {
     std::int8_t value{std::numeric_limits<std::int8_t>::min()};
     EXPECT_EQ(value, set_field_get_field(value));
 }
 
-TEST(GroupImplTests, set_get_uint8_t)
+TEST(StaticGroupImplTests, set_get_uint8_t)
 {
     std::uint8_t value{std::numeric_limits<std::uint8_t>::max()};
     EXPECT_EQ(value, set_field_get_field(value));
 }
 
-TEST(GroupImplTests, set_get_int16_t)
+TEST(StaticGroupImplTests, set_get_int16_t)
 {
     std::int16_t value{std::numeric_limits<std::int16_t>::min()};
     EXPECT_EQ(value, set_field_get_field(value));
 }
 
-TEST(GroupImplTests, set_get_uint16_t)
+TEST(StaticGroupImplTests, set_get_uint16_t)
 {
     std::uint16_t value{std::numeric_limits<std::uint16_t>::max()};
     EXPECT_EQ(value, set_field_get_field(value));
 }
 
-TEST(GroupImplTests, set_get_int32_t)
+TEST(StaticGroupImplTests, set_get_int32_t)
 {
     std::int32_t value{std::numeric_limits<std::int32_t>::min()};
     EXPECT_EQ(value, set_field_get_field(value));
 }
 
-TEST(GroupImplTests, set_get_uint32_t)
+TEST(StaticGroupImplTests, set_get_uint32_t)
 {
     std::uint32_t value{std::numeric_limits<std::uint32_t>::max()};
     EXPECT_EQ(value, set_field_get_field(value));
 }
 
-TEST(GroupImplTests, set_get_int64_t)
+TEST(StaticGroupImplTests, set_get_int64_t)
 {
     std::int64_t value{std::numeric_limits<std::int64_t>::min()};
     EXPECT_EQ(value, set_field_get_field(value));
 }
 
-TEST(GroupImplTests, set_get_uint64_t)
+TEST(StaticGroupImplTests, set_get_uint64_t)
 {
     std::uint64_t value{std::numeric_limits<std::uint64_t>::max()};
     EXPECT_EQ(value, set_field_get_field(value));
 }
 
-TEST(GroupImplTests, set_get_double)
+TEST(StaticGroupImplTests, set_get_double)
 {
     double value{std::numeric_limits<double>::min()};
     EXPECT_DOUBLE_EQ(value, set_field_get_field(value));
@@ -79,7 +79,7 @@ TEST(GroupImplTests, set_get_double)
     EXPECT_DOUBLE_EQ(value, set_field_get_field(value));
 }
 
-TEST(GroupImplTests, set_get_string_view)
+TEST(StaticGroupImplTests, set_get_string_view)
 {
     std::vector<std::uint8_t> data(6);
     StaticGroupImpl group(data);
@@ -92,7 +92,7 @@ TEST(GroupImplTests, set_get_string_view)
     EXPECT_EQ(expected, data);
 }
 
-TEST(GroupImplTests, set_get_string_view_with_trailing_nulls)
+TEST(StaticGroupImplTests, set_get_string_view_with_trailing_nulls)
 {
     std::vector<std::uint8_t> data(11);
     StaticGroupImpl group(data);
@@ -105,7 +105,7 @@ TEST(GroupImplTests, set_get_string_view_with_trailing_nulls)
     EXPECT_EQ(expected, data);
 }
 
-TEST(GroupImplTests, set_get_binary)
+TEST(StaticGroupImplTests, set_get_binary)
 {
     std::vector<std::uint8_t> data(6);
     StaticGroupImpl group(data);
@@ -119,7 +119,7 @@ TEST(GroupImplTests, set_get_binary)
     EXPECT_EQ(expected, data);
 }
 
-TEST(GroupImplTests, set_get_binary_with_trailing_nulls)
+TEST(StaticGroupImplTests, set_get_binary_with_trailing_nulls)
 {
     std::vector<std::uint8_t> data(11);
     StaticGroupImpl group(data);
@@ -133,7 +133,7 @@ TEST(GroupImplTests, set_get_binary_with_trailing_nulls)
     EXPECT_EQ(expected, data);
 }
 
-TEST(GroupImplTests, set_get_optional)
+TEST(StaticGroupImplTests, set_get_optional)
 {
     std::optional<std::int32_t> value;
     EXPECT_EQ(value, set_field_get_field(value, sizeof(value) + 1));
