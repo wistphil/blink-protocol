@@ -84,13 +84,7 @@ void StaticGroupImpl::set_field(std::size_t offset, double value)
 {
     static_assert(std::numeric_limits<decltype(value)>::is_iec559, "IEEE 754 floating point arithmetic is required");
 
-    if constexpr (byte_order::ByteOrder::native == byte_order::ByteOrder::little) {
-        std::memcpy(&data_[offset], &value, sizeof(value));
-    }
-    else {
-        auto swapped = byte_order::swap_bytes(value);
-        std::memcpy(&data_[offset], &swapped, sizeof(swapped));
-    }
+    byte_order::encode_little(&data_[offset], value);
 }
 
 auto StaticGroupImpl::do_get_field(std::size_t offset, Tag<bool> tag) const -> decltype(tag)::type
@@ -145,18 +139,7 @@ auto StaticGroupImpl::do_get_field(std::size_t offset, Tag<double> tag) const ->
 
     static_assert(std::numeric_limits<T>::is_iec559, "IEEE 754 floating point arithmetic is required");
 
-    T result{};
-
-    if constexpr (byte_order::ByteOrder::native == byte_order::ByteOrder::little) {
-        std::memcpy(&result, &data_[offset], sizeof(result));
-    }
-    else {
-        T tmp{};
-        std::memcpy(&tmp, &data_[offset], sizeof(tmp));
-        result = byte_order::swap_bytes(tmp);
-    }
-
-    return result;
+    return byte_order::decode_little<decltype(tag)::type>(&data_[offset]);
 }
 
 auto StaticGroupImpl::do_get_field(std::size_t offset, Tag<std::string_view> tag) const -> decltype(tag)::type
