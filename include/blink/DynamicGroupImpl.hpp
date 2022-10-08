@@ -26,14 +26,15 @@ public:
     void set_field(IndirectStorage, std::size_t offset, std::string_view value);
 
     template <typename T>
-    auto get_field(InlineStorage, std::size_t offset) -> T
+    auto get_field(InlineStorage, std::size_t offset) const -> T
     { return static_group_.get_field<T>(offset); }
 
     template <typename T>
-    auto get_field(IndirectStorage storage_tag, std::size_t offset) -> T
+    auto get_field(IndirectStorage storage_tag, std::size_t offset) const -> T
     { return do_get_field(storage_tag, offset, Tag<T>{}); }
 
 private:
+    auto set_preamble_size(std::size_t size) -> void;
     auto set_relative_offset(std::size_t offset) -> std::size_t;
 
     auto do_get_field(IndirectStorage, std::size_t offset, Tag<std::string_view> tag) const -> decltype(tag)::type;
