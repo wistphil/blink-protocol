@@ -1,0 +1,21 @@
+Integers/1 ->
+    u8 num_u8,
+    i8 num_i8,
+    u16 num_u16,
+    i16 num_i16,
+    u32 num_u32,
+    i32 num_i32,
+    u64 num_u64,
+    i64 num_i64
+
+OptFields/2 ->
+    i32 num?,
+    bool b?,
+    string (10) str1?,
+    string str2?
+
+Car/2 ->
+    string make,
+    string model,
+    i32 year,
+    i32 miles

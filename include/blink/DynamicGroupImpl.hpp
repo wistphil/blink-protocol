@@ -26,6 +26,9 @@ public:
     void set_field(IndirectStorage, std::size_t offset, std::string_view value);
 
     template <typename T>
+    void set_field(IndirectStorage, std::size_t offset, std::optional<T> value);
+
+    template <typename T>
     auto get_field(InlineStorage, std::size_t offset) const -> T
     { return static_group_.get_field<T>(offset); }
 
@@ -39,6 +42,9 @@ private:
 
     auto do_get_field(IndirectStorage, std::size_t offset, Tag<std::string_view> tag) const -> decltype(tag)::type;
 
+    template <typename T>
+    auto do_get_field(IndirectStorage, std::size_t offset, Tag<std::optional<T>> tag) const -> typename decltype(tag)::type;
+
 private:
     DynamicGroupPreamble preamble_;
     StaticGroupImpl static_group_;
@@ -51,6 +57,27 @@ template <std::size_t N>
 void DynamicGroupImpl::set_field(IndirectStorage storage_tag, std::size_t offset, const char (& value)[N])
 {
     set_field(storage_tag, offset, std::string_view(value, N - 1));
+}
+
+template<typename T>
+void DynamicGroupImpl::set_field(IndirectStorage storage_tag, std::size_t offset, std::optional<T> value)
+{
+    if (value) {
+        static_group_.set_field(offset++, true);
+        set_field(storage_tag, offset, *value);
+    }
+    else {
+        static_group_.set_field(offset, false);
+    }
+}
+
+template <typename T>
+auto DynamicGroupImpl::do_get_field(IndirectStorage storage_tag, std::size_t offset, Tag<std::optional<T>> tag) const -> typename decltype(tag)::type
+{
+    if (static_group_.get_field<bool>(offset)) {
+        return do_get_field(storage_tag, offset + 1, Tag<T>{});
+    }
+    return {};
 }
 
 } // namespace blink {

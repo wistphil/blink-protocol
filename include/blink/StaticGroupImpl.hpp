@@ -27,8 +27,8 @@ public:
     void set_field(std::size_t offset, std::string_view value, std::size_t max_length);
     void set_field(std::size_t offset, std::span<std::uint8_t> value, std::size_t max_length);
 
-    template<typename T>
-    void set_field(std::size_t offset, std::optional<T> value);
+    template <typename T, typename... Args>
+    void set_field(std::size_t offset, std::optional<T> value, Args... args);
 
     template <typename T>
     auto get_field(std::size_t offset) const -> T
@@ -59,12 +59,12 @@ private:
     std::span<std::uint8_t> data_;
 };
 
-template<typename T>
-void StaticGroupImpl::set_field(std::size_t offset, std::optional<T> value)
+template<typename T, typename... Args>
+void StaticGroupImpl::set_field(std::size_t offset, std::optional<T> value, Args... args)
 {
     if (value) {
         set_field(offset++, true);
-        set_field(offset, *value);
+        set_field(offset, *value, args...);
     }
     else {
         set_field(offset, false);
