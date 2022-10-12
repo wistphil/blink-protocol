@@ -13,6 +13,7 @@ DynamicGroupImpl::DynamicGroupImpl(
     , data_area_(data.subspan(DynamicGroupPreamble::size + data_area_offset))
     , data_area_offset_(data_area_offset)
     , size_(DynamicGroupPreamble::size + data_area_offset)
+    , data_(data.data())
 {
     set_preamble_size(size_);
     preamble_.set_type_id(type_id);

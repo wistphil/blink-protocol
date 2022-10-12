@@ -1,5 +1,7 @@
 #include "blink/Schema.hpp"
 
+#include "fmt/format.h"
+
 #include <unordered_map>
 
 namespace blink {
@@ -32,32 +34,32 @@ const std::unordered_map<std::string, FieldType> str_to_field_type{
 
 namespace field_type {
 
-std::string to_string(FieldType type)
+auto to_string(FieldType type) -> std::string
 {
     switch (type) {
-        case FieldType::I8: return "I8";
-        case FieldType::U8: return "U8";
-        case FieldType::I16: return "I16";
-        case FieldType::U16: return "U16";
-        case FieldType::I32: return "I32";
-        case FieldType::U32: return "U32";
-        case FieldType::I64: return "I64";
-        case FieldType::U64: return "U64";
-        case FieldType::F64: return "F64";
-        case FieldType::Decimal: return "Decmimal";
-        case FieldType::Date: return "Data";
-        case FieldType::TimeOfDayMilli: return "TimeOfDayMilli";
-        case FieldType::TimeOfDayNano: return "TimeOfDayNano";
-        case FieldType::NanoTime: return "NanoTime";
-        case FieldType::MilliTime: return "MilliTime";
-        case FieldType::Bool: return "Bool";
-        case FieldType::String: return "String";
-        case FieldType::Binary: return "Binary";
-        case FieldType::Fixed: return "Fixed";
+        case FieldType::I8: return "i8";
+        case FieldType::U8: return "u8";
+        case FieldType::I16: return "i16";
+        case FieldType::U16: return "u16";
+        case FieldType::I32: return "i32";
+        case FieldType::U32: return "u32";
+        case FieldType::I64: return "i64";
+        case FieldType::U64: return "u64";
+        case FieldType::F64: return "f64";
+        case FieldType::Decimal: return "decmimal";
+        case FieldType::Date: return "date";
+        case FieldType::TimeOfDayMilli: return "timeOfDayMilli";
+        case FieldType::TimeOfDayNano: return "timeOfDayNano";
+        case FieldType::NanoTime: return "nanotime";
+        case FieldType::MilliTime: return "millitime";
+        case FieldType::Bool: return "bool";
+        case FieldType::String: return "string";
+        case FieldType::Binary: return "binary";
+        case FieldType::Fixed: return "gixed";
     }
 }
 
-std::string to_cpp_type(FieldType type)
+auto to_cpp_type(FieldType type) -> std::string
 {
     switch (type) {
         case FieldType::I8: return "std::int8_t";
@@ -82,7 +84,7 @@ std::string to_cpp_type(FieldType type)
     }
 }
 
-std::optional<FieldType> from_string(const std::string & str)
+auto from_string(const std::string & str) -> std::optional<FieldType>
 {
     auto it = str_to_field_type.find(str);
     if (it == str_to_field_type.end()) {
@@ -181,6 +183,32 @@ auto calculate_inline_size(const Field & field) -> std::size_t
         }
         case  FieldType::Fixed: return field.max_length.value_or(0) + additional_size;
     }
+}
+
+auto get_signature(const Field & field) -> std::string
+{
+    std::string out;
+    fmt::format_to(std::back_inserter(out), "{}", field_type::to_string(field.type));
+    if (field.max_length) {
+        fmt::format_to(std::back_inserter(out), " ({})", *field.max_length);
+    }
+    fmt::format_to(std::back_inserter(out), " {}", field.name);
+    if (field.id) {
+        fmt::format_to(std::back_inserter(out), "/{}", *field.id);
+    }
+    if (field.is_optional) {
+        fmt::format_to(std::back_inserter(out), "?");
+    }
+    return out;
+}
+
+auto to_cpp_type(const Field & field) -> std::string
+{
+    auto type = field_type::to_cpp_type(field.type);
+    if (field.is_optional) {
+        type = fmt::format("std::optional<{}>", type);
+    }
+    return type;
 }
 
 } // namespace field {

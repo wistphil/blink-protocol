@@ -5,7 +5,7 @@
 namespace blink {
 
 DynamicGroupPreamble::DynamicGroupPreamble(std::span<std::uint8_t> data)
-    : data_(data)
+    : data_(data.subspan(0, DynamicGroupPreamble::size))
 {
 }
 

@@ -24,6 +24,7 @@ target_sources(blink
         src/DynamicGroupPreamble.cpp
         include/blink/Lexer.hpp
         src/Lexer.cpp
+        include/blink/PrintHelpers.hpp
         include/blink/Schema.hpp
         src/Schema.cpp
         include/blink/SchemaBuilder.hpp

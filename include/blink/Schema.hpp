@@ -33,9 +33,9 @@ enum class FieldType
 
 namespace field_type {
 
-std::string to_string(FieldType type);
-std::string to_cpp_type(FieldType type);
-std::optional<FieldType> from_string(const std::string & str);
+auto to_string(FieldType type) -> std::string;
+auto to_cpp_type(FieldType type) -> std::string;
+auto from_string(const std::string & str) -> std::optional<FieldType>;
 
 } // namespace field_type {
 
@@ -56,6 +56,8 @@ namespace field {
 
 auto is_inline(const Field & field) -> bool;
 auto calculate_inline_size(const Field & field) -> std::size_t;
+auto get_signature(const Field & field) -> std::string;
+auto to_cpp_type(const Field & field) -> std::string;
 
 } // namespace field {
 

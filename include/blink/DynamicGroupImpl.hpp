@@ -14,8 +14,9 @@ public:
             std::size_t data_area_offset,
             std::span<std::uint8_t> data);
 
-    auto get_type_id() const -> std::uint64_t { return preamble_.get_type_id(); }
+    auto get_preamble() const -> DynamicGroupPreamble { return preamble_; }
     auto size() const -> std::size_t { return size_; }
+    auto data() const -> const std::uint8_t * { return data_; }
 
     template <typename T, typename... Args>
     void set_field(InlineStorage, std::size_t offset, T value, Args... args)
@@ -51,6 +52,7 @@ private:
     std::span<std::uint8_t> data_area_;
     std::size_t data_area_offset_{0};
     std::size_t size_{0};
+    std::uint8_t * data_{nullptr};
 };
 
 template <std::size_t N>

@@ -11,7 +11,7 @@ TEST(DynamicGroupImplTests, construction)
     std::vector<std::uint8_t> data(17);
     DynamicGroupImpl group(1, data.size() - DynamicGroupPreamble::size, data);
 
-    EXPECT_EQ(1, group.get_type_id());
+    EXPECT_EQ(1, group.get_preamble().get_type_id());
     EXPECT_EQ(data.size(), group.size());
 }
 
