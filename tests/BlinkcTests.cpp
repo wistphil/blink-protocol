@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "generated/BlinkMessages.hpp"
+#include "generated/TestSchema.hpp"
 
 namespace blink::tests {
 

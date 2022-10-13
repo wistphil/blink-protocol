@@ -1,6 +1,7 @@
 #include "blink/Lexer.hpp"
 #include "blink/SchemaBuilder.hpp"
 
+#include "fmt/format.h"
 #include "inja/inja.hpp"
 
 #include <filesystem>
@@ -114,11 +115,12 @@ bool render_to_file(const std::filesystem::path & output_file, std::string_view 
 auto main(int argc, char * argv[]) -> int
 {
     if (argc != 3) {
+        fmt::print("usage: blinkc <shema-file> <output-path>\n");
         return -1;
     }
 
-    std::filesystem::path schema_file(argv[1]);
-    std::filesystem::path output_file(argv[2]);
+    const std::filesystem::path schema_file(argv[1]);
+    std::filesystem::path output_path(argv[2]);
 
     auto schema_contents = load_file(schema_file);
     if (schema_contents.empty()) {
@@ -133,13 +135,17 @@ auto main(int argc, char * argv[]) -> int
         return -1;
     }
 
-    auto data = process_schema(messages, output_file.stem());
+    const auto stem = schema_file.stem();
+    auto data = process_schema(messages, stem);
 
-    if (!render_to_file(output_file, HeaderTemplateStr, data)) {
+    const auto header_filename = fmt::format("{}.hpp", stem.c_str());
+    const auto cpp_filename = fmt::format("{}.cpp", stem.c_str());
+
+    if (!render_to_file(output_path.replace_filename(header_filename), HeaderTemplateStr, data)) {
         return -1;
     }
 
-    if (auto p = output_file.replace_extension("cpp"); !render_to_file(p, CppTemplateStr, data)) {
+    if (!render_to_file(output_path.replace_filename(cpp_filename), CppTemplateStr, data)) {
         return -1;
     }
 
