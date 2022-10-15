@@ -13,6 +13,9 @@ const std::string HeaderTemplateStr(R"(#pragma once
 #include "blink/DynamicGroupImpl.hpp"
 
 #include <iosfwd>
+{% if exists("namespace") %}
+namespace {{namespace}} {
+{% endif %}
 {% for message in messages %}
 class {{message.name}}
 {
@@ -35,6 +38,9 @@ private:
 
 std::ostream & operator<<(std::ostream & os, const {{message.name}} & msg);
 {% endfor %}
+{% if exists("namespace") %}
+} // namespace {{namespace}} {
+{% endif %}
 )");
 
 const std::string CppTemplateStr(R"(#include "{{file_stem}}.hpp"
@@ -42,6 +48,9 @@ const std::string CppTemplateStr(R"(#include "{{file_stem}}.hpp"
 #include "blink/PrintHelpers.hpp"
 
 #include <ostream>
+{% if exists("namespace") %}
+namespace {{namespace}} {
+{% endif %}
 {% for message in messages %}
 std::ostream & operator<<(std::ostream & os, const {{message.name}} & msg)
 {
@@ -53,6 +62,9 @@ std::ostream & operator<<(std::ostream & os, const {{message.name}} & msg)
     return os;
 }
 {% endfor %}
+{% if exists("namespace") %}
+} // namespace {{namespace}} {
+{% endif %}
 )");
 
 auto load_file(std::filesystem::path path) -> std::vector<char>
@@ -66,9 +78,20 @@ auto load_file(std::filesystem::path path) -> std::vector<char>
             std::istreambuf_iterator<char>{});
 }
 
-auto process_schema(std::span<blink::Message> messages, const std::filesystem::path & stem) -> inja::json
+auto process_schema(const blink::SchemaBuilder & builder, const std::filesystem::path & stem) -> inja::json
 {
     inja::json data;
+
+    if (auto ns = builder.get_namespace(); !ns.empty()) {
+        data["namespace"] = ns;
+    }
+
+    auto messages = builder.get_messages();
+
+    if (messages.empty()) {
+        return data;
+    }
+
     data["file_stem"] = stem.c_str();
     for (const auto & message : messages) {
         inja::json msg;
@@ -129,14 +152,9 @@ auto main(int argc, char * argv[]) -> int
 
     auto tokens = blink::Lexer{blink::CharReader(schema_contents)}.tokenize();
     blink::SchemaBuilder schema_builder{tokens};
-    auto messages = schema_builder.get_messages();
-
-    if (messages.empty()) {
-        return -1;
-    }
 
     const auto stem = schema_file.stem();
-    auto data = process_schema(messages, stem);
+    auto data = process_schema(schema_builder, stem);
 
     const auto header_filename = fmt::format("{}.hpp", stem.c_str());
     const auto cpp_filename = fmt::format("{}.cpp", stem.c_str());

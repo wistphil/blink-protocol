@@ -7,7 +7,7 @@ namespace blink::tests {
 TEST(BlinkcTests, integers)
 {
     std::vector<std::uint8_t> vec(64);
-    Integers msg(vec);
+    test_schema::Integers msg(vec);
 
     msg.set_num_u8(std::numeric_limits<std::uint8_t>::max());
     msg.set_num_i8(std::numeric_limits<std::int8_t>::min());
@@ -33,7 +33,7 @@ TEST(BlinkcTests, integers)
 TEST(BlinkcTests, optional_fields)
 {
     std::vector<std::uint8_t> vec(64);
-    OptFields msg(vec);
+    test_schema::OptFields msg(vec);
 
     EXPECT_FALSE(msg.get_num());
     msg.set_num(42);

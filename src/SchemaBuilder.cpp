@@ -5,9 +5,40 @@ namespace blink {
 SchemaBuilder::SchemaBuilder(std::span<Token> tokens)
     : iterator_(tokens.begin())
 {
+    build();
 }
 
-auto SchemaBuilder::get_messages() -> std::vector<Message>
+auto SchemaBuilder::get_namespace() const -> const std::string &
+{
+    return namespace_;
+}
+
+auto SchemaBuilder::get_messages() const -> const std::vector<Message> &
+{
+    return messages_;
+}
+
+auto SchemaBuilder::build() -> void
+{
+    namespace_ = do_get_namespace();
+    messages_ = do_get_messages();
+}
+
+auto SchemaBuilder::do_get_namespace() -> std::string
+{
+    std::string result;
+    if (iterator_->type == TokenClass::Keyword &&
+            iterator_->representation == "namespace") {
+        ++iterator_;
+        if (iterator_->type == TokenClass::Name) {
+            result = iterator_->representation;
+            ++iterator_;
+        }
+    }
+    return result;
+}
+
+auto SchemaBuilder::do_get_messages() -> std::vector<Message>
 {
     std::vector<Message> messages;
     while (iterator_->type != TokenClass::EndOfFile) {

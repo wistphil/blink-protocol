@@ -1,3 +1,5 @@
+namespace test_schema
+
 Integers/1 ->
     u8 num_u8,
     i8 num_i8,
