@@ -4,6 +4,7 @@
 #include <optional>
 #include <ostream>
 #include <string>
+#include <variant>
 #include <vector>
 
 namespace blink {
@@ -60,6 +61,25 @@ auto get_signature(const Field & field) -> std::string;
 auto to_cpp_type(const Field & field) -> std::string;
 
 } // namespace field {
+
+#if 0
+struct Group
+{
+    std::string name;
+    std::vector<std::variant<Group, Field>> fields;
+
+    auto operator==(const Group & group) const -> bool = default;
+};
+
+struct DynamicGroup
+{
+    std::string name;
+    std::optional<std::uint64_t> id;
+    std::vector<std::variant<DynamicGroup, Group, Field>> fields;
+
+    auto operator==(const DynamicGroup & dynamic_group) const -> bool = default;
+};
+#endif
 
 struct Message
 {

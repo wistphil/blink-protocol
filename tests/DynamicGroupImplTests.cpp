@@ -21,8 +21,8 @@ TEST(DynamicGroupImplTests, set_get_string_view)
     DynamicGroupImpl group(std::numeric_limits<std::uint64_t>::max(), 4, data); 
 
     const std::string msg("hello");
-    group.set_field(IndirectStorage{}, 0, msg);
-    EXPECT_EQ(msg, group.get_field<std::string_view>(IndirectStorage{}, 0));
+    group.set_indirect_field(0, msg);
+    EXPECT_EQ(msg, group.get_indirect_field<std::string_view>(0));
 }
 
 } // namespace blink::tests

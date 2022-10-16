@@ -8,8 +8,8 @@ DynamicGroupImpl::DynamicGroupImpl(
         std::uint64_t type_id,
         std::size_t data_area_offset,
         std::span<std::uint8_t> data)
-    : preamble_(data.subspan(0, DynamicGroupPreamble::size))
-    , static_group_(data.subspan(DynamicGroupPreamble::size, data_area_offset))
+    : static_group(data.subspan(DynamicGroupPreamble::size, data_area_offset))
+    , preamble_(data.subspan(0, DynamicGroupPreamble::size))
     , data_area_(data.subspan(DynamicGroupPreamble::size + data_area_offset))
     , data_area_offset_(data_area_offset)
     , size_(DynamicGroupPreamble::size + data_area_offset)
@@ -28,13 +28,18 @@ auto DynamicGroupImpl::set_preamble_size(const std::size_t size) -> void
 auto DynamicGroupImpl::set_relative_offset(const std::size_t offset) -> std::size_t
 {
     const auto relative_offset = static_cast<std::uint32_t>(size_ - DynamicGroupPreamble::size - offset);
-    static_group_.set_field(offset, relative_offset);
+    static_group::set_inline_field(offset, relative_offset);
 
     return static_cast<std::size_t>(offset + relative_offset - data_area_offset_);
 }
 
-void DynamicGroupImpl::set_field(IndirectStorage, const std::size_t offset, std::string_view value)
+auto DynamicGroupImpl::set_indirect_field(const std::size_t offset, std::string_view value) -> void
 {
+    // return if field is already set
+    if (static_group::get_inline_field<std::uint32_t>(offset) != 0) {
+        return;
+    }
+
     auto new_offset = set_relative_offset(offset);
 
     byte_order::encode_little(&data_area_[new_offset], static_cast<std::uint32_t>(value.size()));
@@ -45,9 +50,9 @@ void DynamicGroupImpl::set_field(IndirectStorage, const std::size_t offset, std:
     set_preamble_size(size_);
 }
 
-auto DynamicGroupImpl::do_get_field(IndirectStorage, const std::size_t offset, Tag<std::string_view> tag) const -> decltype(tag)::type
+auto DynamicGroupImpl::do_get_indirect_field(const std::size_t offset, Tag<std::string_view> tag) const -> decltype(tag)::type
 {
-    const auto relative_offset = static_group_.get_field<std::uint32_t>(offset);
+    const auto relative_offset = static_group::get_inline_field<std::uint32_t>(offset);
 
     auto new_offset = static_cast<std::size_t>(offset + relative_offset - data_area_offset_);
     auto length = byte_order::decode_little<std::uint32_t>(&data_area_[new_offset]);

@@ -46,7 +46,4 @@ auto from_string(std::string_view sv) -> std::optional<T>
 template <typename T>
 struct Tag { using type = T; };
 
-struct InlineStorage {};
-struct IndirectStorage {};
-
 } // namespace blink {

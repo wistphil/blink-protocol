@@ -29,8 +29,8 @@ public:
     auto size() const -> std::size_t { return impl_.size(); }
     auto data() const -> const std::uint8_t * { return impl_.data(); }
     {% for field in message.fields %}
-    auto set_{{field.name}}({{field.cpp_type}} {{field.name}}) -> void { impl_.set_field({{field.storage}}, {{field.offset}}, {{field.name}}{% if existsIn(field, "max_length") %}, {{field.max_length}}u{% endif %}); }
-    auto get_{{field.name}}() const -> {{field.cpp_type}} { return impl_.get_field<{{field.cpp_type}}>({{field.storage}}, {{field.offset}}); }
+    auto set_{{field.name}}({{field.cpp_type}} {{field.name}}) -> void { impl_.set_{{field.field_type}}({{field.offset}}, {{field.name}}{% if existsIn(field, "max_length") %}, {{field.max_length}}u{% endif %}); }
+    auto get_{{field.name}}() const -> {{field.cpp_type}} { return impl_.get_{{field.field_type}}<{{field.cpp_type}}>({{field.offset}}); }
     {% endfor %}
 private:
     blink::DynamicGroupImpl impl_;
@@ -107,10 +107,10 @@ auto process_schema(const blink::SchemaBuilder & builder, const std::filesystem:
                 json_field["max_length"] = *field.max_length;
             }
             if (blink::field::is_inline(field)) {
-                json_field["storage"] = "blink::InlineStorage{}";
+                json_field["field_type"] = "inline_field";
             }
             else {
-                json_field["storage"] = "blink::IndirectStorage{}";
+                json_field["field_type"] = "indirect_field";
             }
             json_field["signature"] = blink::field::get_signature(field);
             offset += blink::field::calculate_inline_size(field);

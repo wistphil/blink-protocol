@@ -12,8 +12,8 @@ auto set_field_get_field(T value, std::size_t buffer_size = sizeof(T)) -> T
     std::vector<std::uint8_t> data(buffer_size);
     StaticGroupImpl group(data);
 
-    group.set_field(0, value);
-    return group.get_field<T>(0);
+    group.set_inline_field(0, value);
+    return group.get_inline_field<T>(0);
 }
 
 TEST(StaticGroupImplTests, set_get_bool)
@@ -85,8 +85,8 @@ TEST(StaticGroupImplTests, set_get_string_view)
     StaticGroupImpl group(data);
 
     std::string msg("hello");
-    group.set_field(0, msg, 5);
-    EXPECT_EQ(msg, group.get_field<std::string_view>(0));
+    group.set_inline_field(0, msg, 5);
+    EXPECT_EQ(msg, group.get_inline_field<std::string_view>(0));
 
     std::vector<std::uint8_t> expected{5, 'h', 'e', 'l', 'l', 'o'};
     EXPECT_EQ(expected, data);
@@ -98,8 +98,8 @@ TEST(StaticGroupImplTests, set_get_string_view_with_trailing_nulls)
     StaticGroupImpl group(data);
 
     std::string msg("hello");
-    group.set_field(0, msg, 10);
-    EXPECT_EQ(msg, group.get_field<std::string_view>(0));
+    group.set_inline_field(0, msg, 10);
+    EXPECT_EQ(msg, group.get_inline_field<std::string_view>(0));
 
     std::vector<std::uint8_t> expected{5, 'h', 'e', 'l', 'l', 'o', '\0', '\0', '\0', '\0', '\0'};
     EXPECT_EQ(expected, data);
@@ -111,8 +111,8 @@ TEST(StaticGroupImplTests, set_get_binary)
     StaticGroupImpl group(data);
 
     std::vector<std::uint8_t> value{1, 2, 0, 4, 5};
-    group.set_field(0, value, 5);
-    auto decoded = group.get_field<std::span<std::uint8_t>>(0);
+    group.set_inline_field(0, value, 5);
+    auto decoded = group.get_inline_field<std::span<std::uint8_t>>(0);
     EXPECT_TRUE(std::equal(value.begin(), value.end(), decoded.begin()));
 
     std::vector<std::uint8_t> expected{5, 1, 2, 0, 4, 5};
@@ -125,8 +125,8 @@ TEST(StaticGroupImplTests, set_get_binary_with_trailing_nulls)
     StaticGroupImpl group(data);
 
     std::vector<std::uint8_t> value{1, 2, 0, 4, 5};
-    group.set_field(0, value, 10);
-    auto decoded = group.get_field<std::span<std::uint8_t>>(0);
+    group.set_inline_field(0, value, 10);
+    auto decoded = group.get_inline_field<std::span<std::uint8_t>>(0);
     EXPECT_TRUE(std::equal(value.begin(), value.end(), decoded.begin()));
 
     std::vector<std::uint8_t> expected{5, 1, 2, 0, 4, 5, 0, 0, 0, 0, 0};

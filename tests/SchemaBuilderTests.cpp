@@ -41,7 +41,6 @@ TEST(SchemaBuilderTests, get_message)
         Field expected{.name = "miles", .id = {}, .type = FieldType::I32, .max_length = {}, .is_optional = true};
         EXPECT_EQ(expected, fields[3]);
     }
-    
 }
 
 } // namespace blink::tests
