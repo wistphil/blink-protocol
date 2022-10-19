@@ -18,10 +18,14 @@ target_include_directories(blink
 target_sources(blink
     PRIVATE
         include/blink/CharReader.hpp
+        include/blink/DataArea.hpp
+        src/DataArea.cpp
         include/blink/DynamicGroupImpl.hpp
         src/DynamicGroupImpl.cpp
         include/blink/DynamicGroupPreamble.hpp
         src/DynamicGroupPreamble.cpp
+        include/blink/GroupImpl.hpp
+        src/GroupImpl.cpp
         include/blink/Lexer.hpp
         src/Lexer.cpp
         include/blink/PrintHelpers.hpp

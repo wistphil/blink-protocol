@@ -13,6 +13,8 @@ class StaticGroupImpl
 public:
     StaticGroupImpl(std::span<std::uint8_t> data);
 
+    auto size() const -> std::size_t { return data_.size(); }
+
     void set_inline_field(std::size_t offset, bool value);
     void set_inline_field(std::size_t offset, std::int8_t value);
     void set_inline_field(std::size_t offset, std::uint8_t value);

@@ -4,6 +4,7 @@ find_package(GTest CONFIG REQUIRED)
 
 add_executable(blink_tests
     DynamicGroupImplTests.cpp
+    GroupImplTests.cpp
     LexerTests.cpp
     SchemaBuilderTests.cpp
     StaticGroupImplTests.cpp)
