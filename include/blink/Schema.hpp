@@ -32,6 +32,15 @@ enum class FieldType
     Fixed
 };
 
+struct TypeInfo
+{
+    std::string representation;
+    std::optional<FieldType> type;
+
+    auto operator==(const TypeInfo & lhs) const -> bool = default;
+};
+
+
 namespace field_type {
 
 auto to_string(FieldType type) -> std::string;
@@ -44,7 +53,8 @@ struct Field
 {
     std::string name;
     std::optional<std::uint64_t> id;
-    FieldType type;
+    TypeInfo type_info;
+    std::size_t size{0};
     std::optional<std::uint8_t> max_length;
     bool is_optional{false};
 
@@ -56,7 +66,7 @@ std::ostream & operator<<(std::ostream & os, const Field & field);
 namespace field {
 
 auto is_inline(const Field & field) -> bool;
-auto calculate_inline_size(const Field & field) -> std::size_t;
+auto calculate_inline_size(FieldType type, std::optional<std::size_t> max_length, bool is_optional) -> std::size_t;
 auto get_signature(const Field & field) -> std::string;
 auto to_cpp_type(const Field & field) -> std::string;
 
@@ -85,6 +95,7 @@ struct Message
 {
     std::string name;
     std::optional<std::uint64_t> id;
+    std::size_t size{0};
     std::vector<Field> fields;
 
     auto operator==(const Message & message) const -> bool = default;

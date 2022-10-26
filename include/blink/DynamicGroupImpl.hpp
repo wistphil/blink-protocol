@@ -43,6 +43,8 @@ public:
         return group_.get_indirect_field<T>(offset);
     }
 
+    auto get_group(std::size_t offset, std::size_t size) const -> GroupImpl;
+
 private:
     auto set_preamble_size(std::size_t size) -> void;
 

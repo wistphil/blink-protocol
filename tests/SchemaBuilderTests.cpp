@@ -23,22 +23,26 @@ TEST(SchemaBuilderTests, get_message)
     const auto & fields = msg.fields;
 
     {
-        Field expected{.name = "make", .id = {}, .type = FieldType::String, .max_length = 10, .is_optional = false};
+        TypeInfo type_info{.representation = "string", .type = FieldType::String};
+        Field expected{.name = "make", .id = {}, .type_info = type_info, .size = 11,  .max_length = 10, .is_optional = false};
         EXPECT_EQ(expected, fields[0]);
     }
 
     {
-        Field expected{.name = "model", .id = {}, .type = FieldType::String, .max_length = {}, .is_optional = false};
+        TypeInfo type_info{.representation = "string", .type = FieldType::String};
+        Field expected{.name = "model", .id = {}, .type_info = type_info, .size = 4,  .max_length = {}, .is_optional = false};
         EXPECT_EQ(expected, fields[1]);
     }
 
     {
-        Field expected{.name = "year", .id = 42, .type = FieldType::I32, .max_length = {}, .is_optional = false};
+        TypeInfo type_info{.representation = "i32", .type = FieldType::I32};
+        Field expected{.name = "year", .id = 42, .type_info = type_info, .size = 4,  .max_length = {}, .is_optional = false};
         EXPECT_EQ(expected, fields[2]);
     }
 
     {
-        Field expected{.name = "miles", .id = {}, .type = FieldType::I32, .max_length = {}, .is_optional = true};
+        TypeInfo type_info{.representation = "i32", .type = FieldType::I32};
+        Field expected{.name = "miles", .id = {}, .type_info = type_info, .size = 5,  .max_length = {}, .is_optional = true};
         EXPECT_EQ(expected, fields[3]);
     }
 }

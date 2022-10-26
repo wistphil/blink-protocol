@@ -37,4 +37,11 @@ auto GroupImpl::do_get_indirect_field(const std::size_t offset, Tag<std::string_
     return data_area_.get_field<decltype(tag)::type>(static_cast<std::size_t>(new_offset));
 }
 
+auto GroupImpl::get_group(std::size_t offset, std::size_t size) const -> GroupImpl
+{
+    auto group_data = static_group::subspan(offset, size);
+    std::int64_t data_area_offset = data_area_offset_ - static_cast<std::int64_t>(offset);
+    return GroupImpl(group_data, data_area_offset, data_area_);
+}
+
 } // namespace blink {

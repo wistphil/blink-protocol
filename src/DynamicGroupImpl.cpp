@@ -26,4 +26,9 @@ auto DynamicGroupImpl::set_preamble_size(const std::size_t size) -> void
     preamble_.set_size(static_cast<std::uint32_t>(size) - sizeof(std::uint32_t));
 }
 
+auto DynamicGroupImpl::get_group(std::size_t offset, std::size_t size) const -> GroupImpl
+{
+    return group_.get_group(offset, size);
+}
+
 } // namespace blink {

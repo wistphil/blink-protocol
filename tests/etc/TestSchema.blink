@@ -21,3 +21,12 @@ Car/2 ->
     string model,
     i32 year,
     i32 miles
+
+Point ->
+    i32 x,
+    i32 y
+
+Square/3 ->
+    i32 length,
+    Point top_left,
+    string description

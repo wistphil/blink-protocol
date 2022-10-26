@@ -13,30 +13,54 @@ const std::string HeaderTemplateStr(R"(#pragma once
 #include "blink/DynamicGroupImpl.hpp"
 
 #include <iosfwd>
+
 {% if exists("namespace") %}
 namespace {{namespace}} {
 {% endif %}
+
 {% for message in messages %}
 class {{message.name}}
 {
 public:
+    {% if message.is_group %}
+    explicit {{message.name}}(blink::GroupImpl group)
+        : impl_(group)
+    { }
+
+    {% else %}
     explicit {{message.name}}(std::span<std::uint8_t> data)
         : impl_({{message.id}}, {{message.data_area_offset}}, data)
     { }
 
-    constexpr auto get_name() const -> std::string_view { return "{{message.name}}"; }
     auto get_preamble() const -> blink::DynamicGroupPreamble { return impl_.get_preamble(); }
+    {% endif %}
+    constexpr auto get_name() const -> std::string_view { return "{{message.name}}"; }
     auto size() const -> std::size_t { return impl_.size(); }
     auto data() const -> const std::uint8_t * { return impl_.data(); }
+
     {% for field in message.fields %}
-    auto set_{{field.name}}({{field.cpp_type}} {{field.name}}) -> void { impl_.set_{{field.field_type}}({{field.offset}}, {{field.name}}{% if existsIn(field, "max_length") %}, {{field.max_length}}u{% endif %}); }
+    {% if field.is_group %}
+    auto get_{{field.name}}() const -> {{field.cpp_type}} { return {{field.cpp_type}}(impl_.get_group({{field.offset}}, {{field.size}})); }
+    {% else %}
+    {% if existsIn(field, "max_length") %}
+    auto set_{{field.name}}({{field.cpp_type}} {{field.name}}) -> void { impl_.set_{{field.field_type}}({{field.offset}}, {{field.name}}, {{field.max_length}}u); }
+    {% else %}
+    auto set_{{field.name}}({{field.cpp_type}} {{field.name}}) -> void { impl_.set_{{field.field_type}}({{field.offset}}, {{field.name}}); }
+    {% endif %}
     auto get_{{field.name}}() const -> {{field.cpp_type}} { return impl_.get_{{field.field_type}}<{{field.cpp_type}}>({{field.offset}}); }
+    {% endif %}
     {% endfor %}
+
 private:
+    {% if message.is_group %}
+    blink::GroupImpl impl_;
+    {% else %}
     blink::DynamicGroupImpl impl_;
+    {% endif %}
 };
 
 std::ostream & operator<<(std::ostream & os, const {{message.name}} & msg);
+
 {% endfor %}
 {% if exists("namespace") %}
 } // namespace {{namespace}} {
@@ -54,11 +78,18 @@ namespace {{namespace}} {
 {% for message in messages %}
 std::ostream & operator<<(std::ostream & os, const {{message.name}} & msg)
 {
+    {% if message.is_group %}
+    os << "->";
+    {% else %}
     os << "{{message.name}}/{{message.id}} (" << msg.get_preamble().get_size() << ") ->";
+    {% endif %}
     {% for field in message.fields %}
+    {% if field.is_group %}
+    os << "\n    {{field.signature}} " << blink::make_printer(msg.get_{{field.name}}());
+    {% else %}
     os << "\n    {{field.signature}} = " << blink::make_printer(msg.get_{{field.name}}());
+    {% endif %}
     {% endfor %}
-    os << '\n';
     return os;
 }
 {% endfor %}
@@ -96,13 +127,14 @@ auto process_schema(const blink::SchemaBuilder & builder, const std::filesystem:
     for (const auto & message : messages) {
         inja::json msg;
         msg["name"] = message.name;
-        msg["id"] = message.id.value_or(0);
         int offset{0};
         for (const auto & field : message.fields) {
             inja::json json_field;
             json_field["offset"] = offset;
+            json_field["size"] = field.size;
             json_field["name"] = field.name;
             json_field["cpp_type"] = blink::field::to_cpp_type(field);
+            json_field["is_group"] = !field.type_info.type.has_value();
             if (field.max_length) {
                 json_field["max_length"] = *field.max_length;
             }
@@ -113,10 +145,17 @@ auto process_schema(const blink::SchemaBuilder & builder, const std::filesystem:
                 json_field["field_type"] = "indirect_field";
             }
             json_field["signature"] = blink::field::get_signature(field);
-            offset += blink::field::calculate_inline_size(field);
+            offset += field.size;
             msg["fields"].push_back(json_field);
         }
-        msg["data_area_offset"] = offset;
+        if (message.id) {
+            msg["is_group"] = false;
+            msg["id"] = *message.id;
+            msg["data_area_offset"] = offset;
+        }
+        else {
+            msg["is_group"] = true;
+        }
         data["messages"].push_back(msg);
     }
 
@@ -130,7 +169,10 @@ bool render_to_file(const std::filesystem::path & output_file, std::string_view 
         return false;
     }
 
-    inja::render_to(fout, str, data);
+    inja::Environment env;
+    env.set_trim_blocks(true);
+    env.set_lstrip_blocks(true);
+    env.render_to(fout, env.parse(str), data);
 
     return true;
 }

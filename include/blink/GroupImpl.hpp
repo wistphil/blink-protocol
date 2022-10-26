@@ -17,8 +17,6 @@ public:
             std::int64_t data_area_offset,
             DataArea & data_area);
 
-    auto size() const -> std::size_t { return static_group::size(); }
-
     template <std::size_t N>
     auto set_indirect_field(std::size_t offset, const char (& value)[N]) -> void;
     auto set_indirect_field(std::size_t offset, std::string_view value) -> void;
@@ -29,6 +27,8 @@ public:
     template <typename T>
     auto get_indirect_field(std::size_t offset) const -> T
     { return do_get_indirect_field(offset, Tag<T>{}); }
+
+    auto get_group(std::size_t offset, std::size_t size) const -> GroupImpl;
 
 private:
     auto set_relative_offset(std::size_t offset) -> void;

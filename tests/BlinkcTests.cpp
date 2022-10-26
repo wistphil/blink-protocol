@@ -57,4 +57,18 @@ TEST(BlinkcTests, optional_fields)
     EXPECT_EQ("ABCDEFG", *msg.get_str2());
 }
 
+TEST(BlinkcTests, static_group)
+{
+    std::vector<std::uint8_t> vec(64);
+    test_schema::Square msg(vec);
+    std::cout << msg << '\n';
+
+    msg.set_length(25);
+    msg.get_top_left().set_x(5);
+    msg.get_top_left().set_y(10);
+    msg.set_description("my square");
+
+    std::cout << msg << '\n';
+}
+
 } // namespace blink::tests

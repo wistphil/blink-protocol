@@ -13,7 +13,11 @@ class StaticGroupImpl
 public:
     StaticGroupImpl(std::span<std::uint8_t> data);
 
+    auto data() const -> const std::uint8_t * { return data_.data(); }
     auto size() const -> std::size_t { return data_.size(); }
+
+    auto subspan(std::size_t offset, std::size_t size) const -> std::span<std::uint8_t>
+    { return data_.subspan(offset, size); }
 
     void set_inline_field(std::size_t offset, bool value);
     void set_inline_field(std::size_t offset, std::int8_t value);

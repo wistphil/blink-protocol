@@ -55,7 +55,7 @@ auto to_string(FieldType type) -> std::string
         case FieldType::Bool: return "bool";
         case FieldType::String: return "string";
         case FieldType::Binary: return "binary";
-        case FieldType::Fixed: return "gixed";
+        case FieldType::Fixed: return "fixed";
     }
 }
 
@@ -104,7 +104,7 @@ std::ostream & operator<<(std::ostream & os, const Field & field)
 
     os << "Field: {name = " << field.name
             << ", id = " << id
-            << ", type = " << field_type::to_string(field.type)
+            << ", type = " << field.type_info.representation
             << ", max_length = " << max_length
             << ", is_optional = " << std::boolalpha << field.is_optional << "}";
 
@@ -115,7 +115,11 @@ namespace field {
 
 auto is_inline(const Field & field) -> bool
 {
-    switch (field.type) {
+    if (!field.type_info.type) {
+        return true;
+    }
+
+    switch (*field.type_info.type) {
         case FieldType::I8: return true;
         case FieldType::U8: return true;
         case FieldType::I16: return true;
@@ -148,11 +152,11 @@ auto is_inline(const Field & field) -> bool
     }
 }
 
-auto calculate_inline_size(const Field & field) -> std::size_t
+auto calculate_inline_size(FieldType type, std::optional<std::size_t> max_length, bool is_optional) -> std::size_t
 {
-    const std::size_t additional_size = field.is_optional ? 1 : 0;
+    const std::size_t additional_size = is_optional ? 1 : 0;
 
-    switch (field.type) {
+    switch (type) {
         case FieldType::I8: return sizeof(std::int8_t) + additional_size;
         case FieldType::U8: return sizeof(std::uint8_t) + additional_size;
         case FieldType::I16: return sizeof(std::int16_t) + additional_size;
@@ -170,25 +174,25 @@ auto calculate_inline_size(const Field & field) -> std::size_t
         case FieldType::MilliTime: return 0;
         case FieldType::Bool: return sizeof(bool) + additional_size;
         case FieldType::String: {
-            if (!field.max_length) {
+            if (!max_length) {
                 return sizeof(std::uint32_t) + additional_size;
             }
-            return *field.max_length + sizeof(std::uint8_t) + additional_size;
+            return *max_length + sizeof(std::uint8_t) + additional_size;
         }
         case FieldType::Binary: {
-            if (!field.max_length) {
+            if (!max_length) {
                 return sizeof(std::uint32_t) + additional_size;
             }
-            return *field.max_length + sizeof(std::uint8_t) + additional_size;
+            return *max_length + sizeof(std::uint8_t) + additional_size;
         }
-        case  FieldType::Fixed: return field.max_length.value_or(0) + additional_size;
+        case  FieldType::Fixed: return max_length.value_or(0) + additional_size;
     }
 }
 
 auto get_signature(const Field & field) -> std::string
 {
     std::string out;
-    fmt::format_to(std::back_inserter(out), "{}", field_type::to_string(field.type));
+    fmt::format_to(std::back_inserter(out), "{}", field.type_info.representation);
     if (field.max_length) {
         fmt::format_to(std::back_inserter(out), " ({})", *field.max_length);
     }
@@ -204,7 +208,8 @@ auto get_signature(const Field & field) -> std::string
 
 auto to_cpp_type(const Field & field) -> std::string
 {
-    auto type = field_type::to_cpp_type(field.type);
+    auto type = field.type_info.type ?
+            field_type::to_cpp_type(*field.type_info.type) : field.type_info.representation;
     if (field.is_optional) {
         type = fmt::format("std::optional<{}>", type);
     }
