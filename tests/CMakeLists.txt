@@ -7,6 +7,7 @@ add_executable(blink_tests
     GroupImplTests.cpp
     LexerTests.cpp
     SchemaBuilderTests.cpp
+    SequenceImplTests.cpp
     StaticGroupImplTests.cpp)
 
 target_link_libraries(blink_tests PRIVATE blink::blink GTest::gtest GTest::gtest_main)

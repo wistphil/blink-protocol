@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include "blink/DataArea.hpp"
 #include "blink/GroupImpl.hpp"
 
 #include <vector>

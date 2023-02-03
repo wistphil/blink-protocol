@@ -1,10 +1,11 @@
 #pragma once
 
-#include "blink/DataArea.hpp"
 #include "blink/StaticGroupImpl.hpp"
-#include "blink/Util.hpp"
 
 namespace blink {
+
+class DataArea;
+class SequenceImpl;
 
 class GroupImpl : public StaticGroupImpl
 {
@@ -29,6 +30,8 @@ public:
     { return do_get_indirect_field(offset, Tag<T>{}); }
 
     auto get_group(std::size_t offset, std::size_t size) const -> GroupImpl;
+    auto init_sequence(std::size_t offset, std::size_t group_size, std::size_t count) -> SequenceImpl;
+    auto get_sequence(std::size_t offset, std::size_t group_size) const -> SequenceImpl;
 
 private:
     auto set_relative_offset(std::size_t offset) -> void;

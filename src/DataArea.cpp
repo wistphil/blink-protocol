@@ -1,5 +1,7 @@
 #include "blink/DataArea.hpp"
 
+#include "blink/GroupImpl.hpp"
+
 #include "byte_order/Codec.hpp"
 
 namespace blink {
@@ -17,6 +19,13 @@ auto DataArea::add_field(std::string_view value) -> void
     std::memcpy(&data_[offset], value.data(), value.size());
 
     size_ += (value.size() + sizeof(std::uint32_t));
+}
+
+auto DataArea::add_field(std::uint32_t value) -> void
+{
+    auto offset = static_cast<std::uint32_t>(size_);
+    byte_order::encode_little(&data_[offset], value);
+    size_ += sizeof(std::uint32_t);
 }
 
 auto DataArea::do_get_field(const std::size_t offset, Tag<std::string_view> tag) const -> decltype(tag)::type
