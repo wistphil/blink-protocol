@@ -33,9 +33,4 @@ auto SequenceImpl::get(std::size_t index) const -> GroupImpl
     return GroupImpl(group_data, data_area_offset, data_area_);
 }
 
-auto SequenceImpl::operator[](std::size_t index) const -> GroupImpl
-{
-    return get(index);
-}
-
 } // namespace blink {

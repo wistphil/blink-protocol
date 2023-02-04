@@ -35,6 +35,7 @@ target_sources(blink
         src/SchemaBuilder.cpp
         include/blink/StaticGroupImpl.hpp
         src/StaticGroupImpl.cpp
+        include/blink/Sequence.hpp
         include/blink/SequenceImpl.hpp
         src/SequenceImpl.cpp
         include/blink/Token.hpp

@@ -18,8 +18,6 @@ public:
     auto size() const -> std::size_t;
     auto get(std::size_t index) const -> GroupImpl;
 
-    auto operator[](std::size_t index) const -> GroupImpl;
-
 private:
     const std::size_t offset_{0};
     const std::size_t size_{0};
