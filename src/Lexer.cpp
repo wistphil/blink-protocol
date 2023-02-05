@@ -131,10 +131,10 @@ auto Lexer::get_expected_token(TokenClass token_class, std::string expected_rep)
 
     for (auto ch : expected_rep) {
         if (reader_.is_end()) {
-            return get_error("Expected '>'. Found End of File");
+            return get_error(fmt::format("Expected '{}'. Found End of File", ch));
         }
         else if (reader_.current() != ch) {
-            return get_error(fmt::format("Expected '>'. Found '{}'", reader_.current()));
+            return get_error(fmt::format("Expected '{}'. Found '{}'", ch, reader_.current()));
         }
         increment();
     }

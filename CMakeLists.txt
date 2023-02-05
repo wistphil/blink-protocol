@@ -29,6 +29,7 @@ target_sources(blink
         include/blink/Lexer.hpp
         src/Lexer.cpp
         include/blink/PrintHelpers.hpp
+        src/PrintHelpers.cpp
         include/blink/Schema.hpp
         src/Schema.cpp
         include/blink/SchemaBuilder.hpp

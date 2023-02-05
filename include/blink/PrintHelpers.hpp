@@ -7,6 +7,22 @@
 
 namespace blink {
 
+class Indenter
+{
+    static const int s_xalloc;
+
+public:
+    explicit Indenter(std::ostream & os);
+    ~Indenter();
+
+    const std::string & indent() const { return indent_; }
+
+private:
+    std::ostream & os_;
+    std::string indent_;
+    std::int64_t prev_indent_{0};
+};
+
 template <typename T>
 struct Printer 
 {

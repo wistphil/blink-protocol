@@ -30,3 +30,13 @@ Square/3 ->
     i32 length,
     Point top_left,
     string description
+
+Transaction ->
+    i32 timestamp,
+    f64 price,
+    string description
+
+Transactions/4 ->
+    string description,
+    Transaction [] transactions,
+    i32 value

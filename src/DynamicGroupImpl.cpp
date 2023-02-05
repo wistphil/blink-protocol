@@ -1,5 +1,7 @@
 #include "blink/DynamicGroupImpl.hpp"
 
+#include "blink/SequenceImpl.hpp"
+
 namespace blink {
 
 DynamicGroupImpl::DynamicGroupImpl(
@@ -11,7 +13,7 @@ DynamicGroupImpl::DynamicGroupImpl(
     , group_(data.subspan(DynamicGroupPreamble::size, data_area_offset), static_cast<std::int64_t>(data_area_offset), data_area_)
     , data_(data.data())
 {
-    set_preamble_size(size());
+    set_preamble_size();
     preamble_.set_type_id(type_id);
 }
 
@@ -29,6 +31,17 @@ auto DynamicGroupImpl::set_preamble_size(const std::size_t size) -> void
 auto DynamicGroupImpl::get_group(std::size_t offset, std::size_t size) const -> GroupImpl
 {
     return group_.get_group(offset, size);
+}
+
+auto DynamicGroupImpl::init_sequence(std::size_t offset, std::size_t group_size, std::size_t count) -> SequenceImpl
+{
+    auto sequence = group_.init_sequence(offset, group_size, count);
+    return sequence;
+}
+
+auto DynamicGroupImpl::get_sequence(std::size_t offset, std::size_t group_size) const -> SequenceImpl
+{
+    return group_.get_sequence(offset, group_size);
 }
 
 } // namespace blink {

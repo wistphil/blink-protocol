@@ -6,6 +6,8 @@
 
 namespace blink {
 
+class SequenceImpl;
+
 class DynamicGroupImpl
 {
 public:
@@ -15,6 +17,7 @@ public:
             std::span<std::uint8_t> data);
 
     auto get_preamble() const -> DynamicGroupPreamble { return preamble_; }
+    auto set_preamble_size() -> void { set_preamble_size(size()); }
     auto size() const -> std::size_t;
     auto data() const -> const std::uint8_t * { return data_; }
 
@@ -28,7 +31,6 @@ public:
     auto set_indirect_field(std::size_t offset, T value) -> void
     {
         group_.set_indirect_field(offset, value);
-        set_preamble_size(size());
     }
 
     template <typename T>
@@ -44,6 +46,8 @@ public:
     }
 
     auto get_group(std::size_t offset, std::size_t size) const -> GroupImpl;
+    auto init_sequence(std::size_t offset, std::size_t group_size, std::size_t count) -> SequenceImpl;
+    auto get_sequence(std::size_t offset, std::size_t group_size) const -> SequenceImpl;
 
 private:
     auto set_preamble_size(std::size_t size) -> void;

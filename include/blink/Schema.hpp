@@ -54,9 +54,11 @@ struct Field
     std::string name;
     std::optional<std::uint64_t> id;
     TypeInfo type_info;
-    std::size_t size{0};
+    std::size_t inline_size{0};
+    std::size_t indirect_size{0};
     std::optional<std::uint8_t> max_length;
     bool is_optional{false};
+    bool is_sequence{false};
 
     auto operator==(const Field & field) const -> bool = default;
 };
@@ -66,7 +68,7 @@ std::ostream & operator<<(std::ostream & os, const Field & field);
 namespace field {
 
 auto is_inline(const Field & field) -> bool;
-auto calculate_inline_size(FieldType type, std::optional<std::size_t> max_length, bool is_optional) -> std::size_t;
+auto calculate_inline_size(FieldType type, std::optional<std::size_t> max_length, bool is_optional, bool is_sequence) -> std::size_t;
 auto get_signature(const Field & field) -> std::string;
 auto to_cpp_type(const Field & field) -> std::string;
 

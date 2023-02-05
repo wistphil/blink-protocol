@@ -99,7 +99,7 @@ auto SchemaBuilder::get_fields() -> Result<std::pair<std::size_t, std::vector<Fi
         return get_error_message(first_field);
     }
     fields.push_back(get_value(std::move(first_field)));
-    size += fields.back().size;
+    size += fields.back().inline_size;
 
     while (iterator_->type == TokenClass::Comma) {
         ++iterator_;
@@ -108,7 +108,7 @@ auto SchemaBuilder::get_fields() -> Result<std::pair<std::size_t, std::vector<Fi
             return get_error_message(field); 
         }
         fields.push_back(get_value(std::move(field)));
-        size += fields.back().size;
+        size += fields.back().inline_size;
     }
     return std::make_pair(size, std::move(fields));
 }
@@ -120,6 +120,7 @@ auto SchemaBuilder::get_field() -> Result<Field>
         return std::string{};
     }
     std::optional<std::uint8_t> max_length;
+    bool is_sequence{false};
     if (iterator_->type == TokenClass::OpenParen) {
         ++iterator_;
         if (iterator_->type != TokenClass::UInt) {
@@ -133,6 +134,14 @@ auto SchemaBuilder::get_field() -> Result<Field>
         if (iterator_->type != TokenClass::CloseParen) {
             return std::string{};
         }
+        ++iterator_;
+    }
+    else if (iterator_->type == TokenClass::OpenRectBracket) {
+        ++iterator_;
+        if (iterator_->type != TokenClass::CloseRectBracket) {
+            return std::string{};
+        }
+        is_sequence = true;
         ++iterator_;
     }
     if (iterator_->type != TokenClass::Name) {
@@ -158,25 +167,37 @@ auto SchemaBuilder::get_field() -> Result<Field>
         ++iterator_;
     }
 
-    std::size_t size{0};
+    std::size_t inline_size{0};
+    std::size_t indirect_size{0};
     if (!type_info->type) {
         auto it = message_names_.find(type_info->representation);
         if (it == message_names_.end()) {
             return std::string{};
         }
-        size = it->second->size;
+        if (is_sequence) {
+            inline_size = sizeof(std::uint32_t);
+            indirect_size = it->second->size;
+        }
+        else {
+            inline_size = it->second->size;
+        }
     }
     else {
-        size = field::calculate_inline_size(*type_info->type, max_length, is_optional);
+        inline_size = field::calculate_inline_size(*type_info->type, max_length, is_optional, is_sequence);
+        if (!max_length && *type_info->type == FieldType::String) {
+            indirect_size = sizeof(std::uint32_t);
+        }
     }
 
     return Field{
             .name = name,
             .id = id,
             .type_info = *type_info,
-            .size = size,
+            .inline_size = inline_size,
+            .indirect_size = indirect_size,
             .max_length = max_length,
-            .is_optional = is_optional};
+            .is_optional = is_optional,
+            .is_sequence = is_sequence};
 }
 
 auto SchemaBuilder::get_type_info() -> std::optional<TypeInfo>

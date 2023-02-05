@@ -105,8 +105,11 @@ std::ostream & operator<<(std::ostream & os, const Field & field)
     os << "Field: {name = " << field.name
             << ", id = " << id
             << ", type = " << field.type_info.representation
+            << ", inline_size = " << field.inline_size
+            << ", indirect_size = " << field.indirect_size
             << ", max_length = " << max_length
-            << ", is_optional = " << std::boolalpha << field.is_optional << "}";
+            << ", is_optional = " << std::boolalpha << field.is_optional
+            << ", is_sequence = " << field.is_sequence << "}";
 
     return os;
 }
@@ -115,6 +118,10 @@ namespace field {
 
 auto is_inline(const Field & field) -> bool
 {
+    if (field.is_sequence) {
+        return false;
+    }
+
     if (!field.type_info.type) {
         return true;
     }
@@ -152,9 +159,13 @@ auto is_inline(const Field & field) -> bool
     }
 }
 
-auto calculate_inline_size(FieldType type, std::optional<std::size_t> max_length, bool is_optional) -> std::size_t
+auto calculate_inline_size(FieldType type, std::optional<std::size_t> max_length, bool is_optional, bool is_sequence) -> std::size_t
 {
     const std::size_t additional_size = is_optional ? 1 : 0;
+
+    if (is_sequence) {
+        return sizeof(std::uint32_t) + additional_size;
+    }
 
     switch (type) {
         case FieldType::I8: return sizeof(std::int8_t) + additional_size;
@@ -196,6 +207,9 @@ auto get_signature(const Field & field) -> std::string
     if (field.max_length) {
         fmt::format_to(std::back_inserter(out), " ({})", *field.max_length);
     }
+    else if (field.is_sequence) {
+        out.append(" []");
+    }
     fmt::format_to(std::back_inserter(out), " {}", field.name);
     if (field.id) {
         fmt::format_to(std::back_inserter(out), "/{}", *field.id);
@@ -212,6 +226,9 @@ auto to_cpp_type(const Field & field) -> std::string
             field_type::to_cpp_type(*field.type_info.type) : field.type_info.representation;
     if (field.is_optional) {
         type = fmt::format("std::optional<{}>", type);
+    }
+     if (field.is_sequence) {
+        type = fmt::format("blink::Sequence<{}>", type);
     }
     return type;
 }

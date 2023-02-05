@@ -2,6 +2,8 @@
 
 #include "generated/TestSchema.hpp"
 
+#include "fmt/format.h"
+
 namespace blink::tests {
 
 TEST(BlinkcTests, integers)
@@ -61,14 +63,43 @@ TEST(BlinkcTests, static_group)
 {
     std::vector<std::uint8_t> vec(64);
     test_schema::Square msg(vec);
-    std::cout << msg << '\n';
 
     msg.set_length(25);
     msg.get_top_left().set_x(5);
     msg.get_top_left().set_y(10);
     msg.set_description("my square");
 
-    std::cout << msg << '\n';
+    EXPECT_EQ(25, msg.get_length());
+    auto point = msg.get_top_left();
+    EXPECT_EQ(5, point.get_x());
+    EXPECT_EQ(10, point.get_y());
+    EXPECT_EQ(std::string_view("my square"), msg.get_description());
+}
+
+TEST(BlinkcTests, sequence)
+{
+    std::vector<std::uint8_t> vec(128);
+    test_schema::Transactions msg(vec);
+
+    msg.set_description("j.doe");
+    msg.set_value(42);
+    auto sequence = msg.init_transactions(3);
+    for (std::size_t i{0}; i < sequence.size(); ++i) {
+        auto t = sequence[i];
+        t.set_description(fmt::format("t_{}", i));
+        t.set_timestamp(20230202);
+        t.set_price(static_cast<double>(i) + 2.25);
+    }
+
+    EXPECT_EQ(std::string_view("j.doe"), msg.get_description());
+    EXPECT_EQ(42, msg.get_value());
+    auto seq = msg.get_transactions();
+    for (std::size_t i{0}; i < seq.size(); ++i) {
+        auto t = seq[i];
+        EXPECT_EQ(fmt::format("t_{}", i), t.get_description());
+        EXPECT_EQ(20230202, t.get_timestamp());
+        EXPECT_DOUBLE_EQ(static_cast<double>(i) + 2.25, t.get_price());
+    }
 }
 
 } // namespace blink::tests

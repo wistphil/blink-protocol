@@ -11,6 +11,9 @@
 const std::string HeaderTemplateStr(R"(#pragma once
 
 #include "blink/DynamicGroupImpl.hpp"
+{% if include_sequence_header %}
+#include "blink/Sequence.hpp"
+{% endif %}
 
 #include <iosfwd>
 
@@ -33,6 +36,7 @@ public:
     { }
 
     auto get_preamble() const -> blink::DynamicGroupPreamble { return impl_.get_preamble(); }
+    auto set_preamble_size() -> void { impl_.set_preamble_size(); }
     {% endif %}
     constexpr auto get_name() const -> std::string_view { return "{{message.name}}"; }
     auto size() const -> std::size_t { return impl_.size(); }
@@ -40,7 +44,12 @@ public:
 
     {% for field in message.fields %}
     {% if field.is_group %}
-    auto get_{{field.name}}() const -> {{field.cpp_type}} { return {{field.cpp_type}}(impl_.get_group({{field.offset}}, {{field.size}})); }
+    {% if field.is_sequence %}
+    auto init_{{field.name}}(std::size_t count) -> {{field.cpp_type}} { return {{field.cpp_type}}(impl_.init_sequence({{field.offset}}, {{field.indirect_size}}, count)); }
+    auto get_{{field.name}}() const -> {{field.cpp_type}} { return {{field.cpp_type}}(impl_.get_sequence({{field.offset}}, {{field.indirect_size}})); }
+    {% else %}
+    auto get_{{field.name}}() const -> {{field.cpp_type}} { return {{field.cpp_type}}(impl_.get_group({{field.offset}}, {{field.inline_size}})); }
+    {% endif %}
     {% else %}
     {% if existsIn(field, "max_length") %}
     auto set_{{field.name}}({{field.cpp_type}} {{field.name}}) -> void { impl_.set_{{field.field_type}}({{field.offset}}, {{field.name}}, {{field.max_length}}u); }
@@ -78,6 +87,7 @@ namespace {{namespace}} {
 {% for message in messages %}
 std::ostream & operator<<(std::ostream & os, const {{message.name}} & msg)
 {
+    blink::Indenter indenter(os);
     {% if message.is_group %}
     os << "->";
     {% else %}
@@ -85,9 +95,20 @@ std::ostream & operator<<(std::ostream & os, const {{message.name}} & msg)
     {% endif %}
     {% for field in message.fields %}
     {% if field.is_group %}
-    os << "\n    {{field.signature}} " << blink::make_printer(msg.get_{{field.name}}());
+    {% if field.is_sequence %}
+    {
+        blink::Indenter seq_indenter(os);
+        auto {{field.name}} = msg.get_{{field.name}}();
+        os << '\n' << indenter.indent() << "{{field.signature}} (" << {{field.name}}.size() << ") ->";
+        for (std::size_t i{0}; i < {{field.name}}.size(); ++i) {
+            os << '\n' << seq_indenter.indent() << "{{field.name}} [" << i << "] " << blink::make_printer({{field.name}}[i]);
+        }
+    }
     {% else %}
-    os << "\n    {{field.signature}} = " << blink::make_printer(msg.get_{{field.name}}());
+    os << '\n' << indenter.indent() << "{{field.signature}} " << blink::make_printer(msg.get_{{field.name}}());
+    {% endif %}
+    {% else %}
+    os << '\n' << indenter.indent() << "{{field.signature}} = " << blink::make_printer(msg.get_{{field.name}}());
     {% endif %}
     {% endfor %}
     return os;
@@ -124,6 +145,7 @@ auto process_schema(const blink::SchemaBuilder & builder, const std::filesystem:
     }
 
     data["file_stem"] = stem.c_str();
+    bool include_sequence_header{false};
     for (const auto & message : messages) {
         inja::json msg;
         msg["name"] = message.name;
@@ -131,10 +153,15 @@ auto process_schema(const blink::SchemaBuilder & builder, const std::filesystem:
         for (const auto & field : message.fields) {
             inja::json json_field;
             json_field["offset"] = offset;
-            json_field["size"] = field.size;
+            json_field["inline_size"] = field.inline_size;
+            json_field["indirect_size"] = field.indirect_size;
             json_field["name"] = field.name;
             json_field["cpp_type"] = blink::field::to_cpp_type(field);
             json_field["is_group"] = !field.type_info.type.has_value();
+            json_field["is_sequence"] = field.is_sequence;
+            if (field.is_sequence) {
+                include_sequence_header = true;
+            }
             if (field.max_length) {
                 json_field["max_length"] = *field.max_length;
             }
@@ -145,7 +172,7 @@ auto process_schema(const blink::SchemaBuilder & builder, const std::filesystem:
                 json_field["field_type"] = "indirect_field";
             }
             json_field["signature"] = blink::field::get_signature(field);
-            offset += field.size;
+            offset += field.inline_size;
             msg["fields"].push_back(json_field);
         }
         if (message.id) {
@@ -157,6 +184,7 @@ auto process_schema(const blink::SchemaBuilder & builder, const std::filesystem:
             msg["is_group"] = true;
         }
         data["messages"].push_back(msg);
+        data["include_sequence_header"] = include_sequence_header;
     }
 
     return data;
