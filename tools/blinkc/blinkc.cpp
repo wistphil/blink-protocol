@@ -35,6 +35,8 @@ public:
         : impl_({{message.id}}, {{message.data_area_offset}}, data)
     { }
 
+    static constexpr std::uint64_t type_id{ {{message.id}} };
+
     auto get_preamble() const -> blink::DynamicGroupPreamble { return impl_.get_preamble(); }
     auto set_preamble_size() -> void { impl_.set_preamble_size(); }
     {% endif %}

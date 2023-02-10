@@ -1,0 +1,25 @@
+namespace example_schema
+
+NewOrder/1 ->
+    u32 seq_num,
+    string sender_id,
+    string (20) symbol,
+    f64 price?,
+    u32 volume,
+    u8 side,
+    string client_order_id
+
+QuoteEntry ->
+    f64 bid_price?,
+    f64 ask_price?,
+    u32 bid_size?,
+    u32 ask_size?,
+    u32 quote_entry_id,
+    string (20) symbol
+
+MassQuote/2 ->
+    u32 seq_num,
+    string sender_id,
+    u32 quote_id,
+    QuoteEntry [] quote_entries
+    

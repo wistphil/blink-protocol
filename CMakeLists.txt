@@ -47,3 +47,4 @@ target_link_libraries(blink PRIVATE byte_order::byte_order fmt::fmt)
 
 add_subdirectory(tools)
 add_subdirectory(tests)
+add_subdirectory(examples)
