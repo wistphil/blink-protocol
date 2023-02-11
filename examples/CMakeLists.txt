@@ -4,7 +4,9 @@ project(blink-protocol-example LANGUAGES CXX)
 string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}" is_top_level)
 
 if(is_top_level)
-    find_package(blink REQUIRED)
+    find_package(byte_order CONFIG REQUIRED)
+    find_package(fmt CONFIG REQUIRED)
+    find_package(blink CONFIG REQUIRED)
 endif()
 
 set(BLINKC_EXAMPLE_GENERATED_FILE_PATH ${CMAKE_CURRENT_BINARY_DIR}/generated)
@@ -16,9 +18,9 @@ add_custom_command(
     OUTPUT ${BLINKC_EXAMPLE_GENERATED_FILE_NAMES}
     COMMAND cmake -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/etc ${CMAKE_CURRENT_BINARY_DIR}/etc
     COMMAND cmake -E make_directory ${BLINKC_EXAMPLE_GENERATED_FILE_PATH}
-    COMMAND blinkc etc/ExampleSchema.blink ${BLINKC_EXAMPLE_GENERATED_FILE_PATH}/
+    COMMAND blink::blinkc etc/ExampleSchema.blink ${BLINKC_EXAMPLE_GENERATED_FILE_PATH}/
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    DEPENDS blinkc ${CMAKE_CURRENT_SOURCE_DIR}/etc/ExampleSchema.blink)
+    DEPENDS blink::blinkc ${CMAKE_CURRENT_SOURCE_DIR}/etc/ExampleSchema.blink)
 
 add_executable(example example.cpp ${BLINKC_EXAMPLE_GENERATED_FILE_NAMES})
 
