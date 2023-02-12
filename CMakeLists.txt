@@ -2,9 +2,16 @@ cmake_minimum_required(VERSION 3.14)
 project(blink-protocol VERSION 0.1.0 LANGUAGES CXX)
 
 include(GNUInstallDirs)
+include(FetchContent)
 
-find_package(byte_order CONFIG REQUIRED)
+FetchContent_Declare(
+    byte_order
+    GIT_REPOSITORY https://github.com/wistphil/byte-order.git
+    GIT_TAG        46af683e8ef8dae38299c9a4b6bbbd121374ed17
+)
+FetchContent_MakeAvailable(byte_order)
 find_package(fmt CONFIG REQUIRED)
+find_package(inja CONFIG REQUIRED)
 
 add_library(blink)
 add_library(blink::blink ALIAS blink)

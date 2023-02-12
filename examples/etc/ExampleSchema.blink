@@ -1,6 +1,16 @@
-namespace example_schema
+namespace examples
 
-NewOrder/1 ->
+Transaction ->
+    i32 timestamp,
+    f64 price,
+    string description?
+
+Transactions/1 ->
+    string owner,
+    string (10) account,
+    Transaction [] transactions
+
+NewOrder/100 ->
     u32 seq_num,
     string sender_id,
     string (20) symbol,
@@ -17,7 +27,7 @@ QuoteEntry ->
     u32 quote_entry_id,
     string (20) symbol
 
-MassQuote/2 ->
+MassQuote/101 ->
     u32 seq_num,
     string sender_id,
     u32 quote_id,

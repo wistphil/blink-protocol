@@ -9,13 +9,13 @@ void handle_messages(std::span<std::uint8_t> data)
         blink::DynamicGroupPreamble preamble(data);
 
         switch (preamble.get_type_id()) {
-            case example_schema::NewOrder::type_id: {
-                example_schema::NewOrder msg(data);
+            case examples::NewOrder::type_id: {
+                examples::NewOrder msg(data);
                 std::cout << "handle " << msg << '\n';
                 break;
             }
-            case example_schema::MassQuote::type_id: {
-                example_schema::MassQuote msg(data);
+            case examples::MassQuote::type_id: {
+                examples::MassQuote msg(data);
                 std::cout << "handle " << msg << '\n';
                 break;
             }
@@ -32,7 +32,7 @@ auto append_mass_quote(std::vector<std::uint8_t> & buffer) -> void
 {
     std::array<std::uint8_t, 256> data{};
 
-    example_schema::MassQuote mass_quote(data);
+    examples::MassQuote mass_quote(data);
     mass_quote.set_seq_num(2);
     mass_quote.set_sender_id("j.doe");
     mass_quote.set_quote_id(12345);
@@ -62,7 +62,7 @@ auto append_new_order(std::vector<std::uint8_t> & buffer) -> void
 {
     std::array<std::uint8_t, 256> data{};
 
-    example_schema::NewOrder order(data);
+    examples::NewOrder order(data);
     order.set_seq_num(1);
     order.set_sender_id("j.doe");
     order.set_symbol("AAPL");
