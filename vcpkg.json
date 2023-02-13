@@ -1,0 +1,9 @@
+{
+    "name": "blink-protocol",
+    "version-string": "0.1.0",
+    "dependencies": [
+        "fmt",
+        "inja",
+        "gtest"
+    ]
+}
