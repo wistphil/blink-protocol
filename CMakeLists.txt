@@ -7,7 +7,7 @@ include(FetchContent)
 FetchContent_Declare(
     byte_order
     GIT_REPOSITORY https://github.com/wistphil/byte-order.git
-    GIT_TAG        46af683e8ef8dae38299c9a4b6bbbd121374ed17
+    GIT_TAG        ecc3a79980947016e72a0cf82d1e3df56889c450
 )
 FetchContent_MakeAvailable(byte_order)
 find_package(fmt CONFIG REQUIRED)
